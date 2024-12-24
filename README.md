@@ -73,7 +73,7 @@ In this repository, we will be spinning up a few different components for a simp
 Each pipeline is made up of a **scrape** file, whose only goal is to send the
 *raw* data to a Kafka topic, and a **consume** file, which parses the messages in Kafka
 and writes the structured data to SQLite.
-2. Some visualisations/dashboards made using Plotly Dash (code in `./src/dashboard/`)
+2. Some visualisations/dashboards made using Plotly Dash (code in `./src/hockey_app.py` & `./src/mystery_picture_app.py`)
 
 ## Instructions
 
@@ -86,12 +86,12 @@ Make yourself familiar with the code:
 The reason why we store this raw unprocessed data in Kafka is because it enables us to decouple the raw data from the processing logic. Also, it allows us to easily replay history if the website ever changes and the parsing logic breaks.
 - the `consume/hockey_kafka_to_sqlite.py` file actually parses the table into structured data, and inserts it into a SQLite table.
 
-Run the `src/pipeline/run.py` file with the IDE. You should see some Scrapy logs in the Run window.  
-Navigate to the Kafka UI at http://localhost:8083 and explore the messages in the hockey-teams topic. Notice how messages contain the raw HTML.  
+Run the `src/run.py` file with the IDE. You should see some Scrapy logs in the Run window.  
+Navigate to the Kafka UI at http://localhost:8083 and explore the messages in the `hockey-teams-results` topic. Notice how messages contain the raw HTML.  
 Then, navigate to the SQLite UI at http://localhost:8082. Open up the `HockeyTeamResults` table and browse for the inserted content.  
 If you're familiar with SQL, you can try to run queries to explore the data.
 
-Then, start the plotly dash app by running the file `./src/dashboard/hockey_app.py` and navigating to http://localhost:8080.
+Then, start the plotly dash app by running the file `./src/hockey_app.py` and navigating to http://localhost:8080.
 
 1) Which team had the most losses in 2011?
 2) Which team had the most wins in a given year?
@@ -119,7 +119,7 @@ For example, let's look at: http://localhost:9999/rows/3. This returns:
 ```
 This means that the 3rd (well, 4th since we count from 0) row of the picture has the pixel grayscale values `[242, 241, 240, ...]`.  
 
-1) Edit the `./src/pipeline/scrape/mystery_picture_spider.py` file to write the scrape of these 500 API pages, and send the **raw** result from the API to Kafka, and run it. To run it, keep using the `./src/pipeline/run.py` entrypoint, just comment the block from the previous task. 
+1) Edit the `./src/pipeline/scrape/mystery_picture_spider.py` file to write the scrape of these 500 API pages, and send the **raw** result from the API to Kafka, and run it. To run it, keep using the `./src/run.py` entrypoint, just comment the block from the previous task. 
 2) After the messages are in Kafka (which you can see via the Kafka UI), edit the `./src/pipeline/consume/mystery_picture_to_sqlite.py` file to parse the raw messages and insert 
    into the MysteryPicture table. That table has the columns `(X, Y, Value)` where X is the row number, Y is the column number, and Value is the grayscale value from 0-255.  
    This means that each raw message from Kafka should insert 500 rows in the table, and that the table should have exactly 500*500 = 250000 entries once the scrape has run.
@@ -127,7 +127,7 @@ This means that the 3rd (well, 4th since we count from 0) row of the picture has
    In `run.py`, you can comment the lines before `print("Start inserting")` to only run the `consume` part of the pipeline. If you had already ran the pipeline, you will have to reset the consumer offsets so that the
    consumer replays the historical raw data that was already scraped with Scrapy. If you don't, it will consider that there are no new messages to process and do nothing, since it will be reading the end of the Kafka topic.
    To reset the consumer offsets, go to the Kafka UI and click on Consumers > sqlite > `...` on the top right > Reset offset > chose the topic, reset type=EARLIEST, partitions=all.
-4) Once the `consume` file has run, on the SQLite UI, run a few sanity checks on the `MysteryPicture` table:
+3) Once the `consume` file has run, on the SQLite UI, run a few sanity checks on the `MysteryPicture` table:
 ```sql
 -- The picture contains 500*500 = 250,000 pixels:
 SELECT COUNT(*)
@@ -154,8 +154,8 @@ SELECT MIN(Value), MAX(Value)
 FROM "MysteryPicture"
 -- This should return (0, 255)
 ```
-4) Edit and run the `./src/dashboard/mystery_picture_app.py` to format the results from the SQL table accordingly in order to display them on a [plotly Heatmap](https://plotly.github.io/plotly.py-docs/generated/plotly.graph_objects.Heatmap.html).
-5) Who's in the picture?
+1) Edit and run the `./src/mystery_picture_app.py` to format the results from the SQL table accordingly in order to display them on a [plotly Heatmap](https://plotly.github.io/plotly.py-docs/generated/plotly.graph_objects.Heatmap.html).
+2) Who's in the picture?
 
 ## Extra questions
 If you have some time left:
