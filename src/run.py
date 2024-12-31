@@ -23,18 +23,18 @@ if __name__ == "__main__":
     process = CrawlerProcess(settings)
 
     # task 1
-    # process.crawl(HockeyResultsSpider)
-    # print("Start Crawling")
-    # process.start()
-    # print("Create table")
-    # HockeyTeamResults().create_table()
-    # print("Start inserting")
-    # hockey_push_to_sqlite()
-
-    ## task 2
-    process.crawl(MysteryPictureSpider)
-    MysteryPicture().create_table()
+    process.crawl(HockeyResultsSpider)
     print("Start Crawling")
     process.start()
+    print("Create table")
+    HockeyTeamResults().create_table()
     print("Start inserting")
-    mystery_picture_push_to_sqlite()
+    hockey_push_to_sqlite()
+
+    ## task 2
+    # process.crawl(MysteryPictureSpider)
+    # MysteryPicture().create_table()
+    # print("Start Crawling")
+    # process.start()
+    # print("Start inserting")
+    # mystery_picture_push_to_sqlite()
